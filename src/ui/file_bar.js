@@ -120,6 +120,18 @@ module.exports = function fileBar(context) {
                     action: function() {
                         meta.bboxify(context);
                     }
+                }, {
+                    title: 'Get isochrones',
+                    alt: 'Calculate isochrones for point objects',
+                    action: function() {
+                        meta.isochrones(context);
+                    }
+                }, {
+                    title: 'Generate itineraries',
+                    alt: 'Generate itineraries for point locations',
+                    action: function() {
+                        meta.otpify(context);
+                    }
                 }
             ]
         }];
