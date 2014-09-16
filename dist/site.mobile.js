@@ -33590,37 +33590,35 @@ module.exports.isochrones = function(context) {
           success: function( data ) {
             geojson = data;
             features.push(geojson.features);
-            // geoLayer = L.geoJson(geojson, {
+            geoLayer = L.geoJson(geojson, {
 
-            //   style: function (feature) {
-            //     switch (feature.properties.Time) {
-            //             case 1800: return {fillColor: "#ff0000", fillOpacity: 0.1, weight: 0};
-            //             // case 3600:   return {fillColor: "#0000ff", weight: 0};
-            //         }
-            //   },
+              style: function (feature) {
+                switch (feature.properties.Time) {
+                        case 1800: return {fillColor: "#ff0000", fillOpacity: 0.1, weight: 0};
+                        // case 3600:   return {fillColor: "#0000ff", weight: 0};
+                    }
+              },
 
-            //   // onEachFeature: onEachFeature,
+              // onEachFeature: onEachFeature,
 
-            //   pointToLayer: function (feature, latlng) {
-            //     return L.circleMarker(latlng, {
-            //       radius: 8,
-            //       fillColor: "#ff7800",
-            //       color: "#000",
-            //       weight: 1,
-            //       opacity: 1,
-            //       fillOpacity: 0.8
-            //     });
-            //   }
-            // }).addTo(window.api.map);
+              pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                  radius: 8,
+                  fillColor: "#ff7800",
+                  color: "#000",
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8
+                });
+              }
+            }).addTo(window.api.map);
 
             console.log(data)
-            context.data.mergeFeatures(geojson.features, 'map');
+
+            // adds data into dataset
+            // context.data.mergeFeatures(geojson.features, 'map');
           }
       });
-      // if (i === map.features.length -1){
-      //   console.log(features)
-      //   context.data.mergeFeatures(features, 'map');
-      // }
     });
     
 };
