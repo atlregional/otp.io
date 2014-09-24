@@ -1,6 +1,7 @@
 var geojsonRandom = require('geojson-random'),
     geojsonExtent = require('geojson-extent'),
-    http = require('http');
+    http = require('http'),
+    intersect = require('turf-intersect');
 // var $ = require('jquery'),
 //     XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 // $.support.cors = true;
@@ -67,44 +68,53 @@ module.exports.isochrones = function(context) {
 	  // headers: {'dataType': 'jsonp'}
 	};
   console.log(context)
+  var unioned;
     $.each(map.features, function(i, feature){
-      var url = 'http://opentrip.atlantaregion.com' + '/otp-rest-servlet/ws/isochrone?algorithm%20=accSampling&fromPlace='+ feature.geometry.coordinates[1] + ',' + feature.geometry.coordinates[0]+'&date=2014/06/16&time=12:00:00&maxWalkDistance=1000&mode=WALK,TRANSIT&cutoffSec=1800';
-      $.ajax({
-          url: url,
-          type: "GET",
-          dataType: "jsonp", 
-          success: function( data ) {
-            geojson = data;
-            features.push(geojson.features);
-            geoLayer = L.geoJson(geojson, {
-
-              style: function (feature) {
-                switch (feature.properties.Time) {
-                        case 1800: return {fillColor: "#ff0000", fillOpacity: 0.1, weight: 0};
-                        // case 3600:   return {fillColor: "#0000ff", weight: 0};
-                    }
-              },
-
-              // onEachFeature: onEachFeature,
-
-              pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, {
-                  radius: 8,
-                  fillColor: "#ff7800",
-                  color: "#000",
-                  weight: 1,
-                  opacity: 1,
-                  fillOpacity: 0.8
-                });
+      if (i !== map.features.length - 1){
+        var url = 'http://opentrip.atlantaregion.com' + '/otp-rest-servlet/ws/isochrone?algorithm%20=accSampling&fromPlace='+ feature.geometry.coordinates[1] + ',' + feature.geometry.coordinates[0]+'&date=2014/06/16&time=12:00:00&maxWalkDistance=1000&mode=WALK,TRANSIT&cutoffSec=1800&cutoffSec=900';
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: "jsonp", 
+            success: function( data ) {
+              if (i !== 0){
+                // unioned = intersect(geojson, data);
+                // console.log(unioned)
               }
-            }).addTo(window.api.map);
+              geojson = data;
 
-            console.log(data)
+              features.push(geojson.features);
+              geoLayer = L.geoJson(geojson, {
 
-            // adds data into dataset
-            // context.data.mergeFeatures(geojson.features, 'map');
-          }
-      });
+                style: function (feature) {
+                  switch (feature.properties.Time) {
+                          case 900: return {fillColor: "#ff0000", fillOpacity: 0.05, weight: 0};
+                          case 1800: return {fillColor: "#0000ff", fillOpacity: 0.05, weight: 0};
+                          // case 900: return {fillColor: "#ff0000", fillOpacity: 0.05, weight: 0};
+                      }
+                },
+
+                // onEachFeature: onEachFeature,
+
+                pointToLayer: function (feature, latlng) {
+                  return L.circleMarker(latlng, {
+                    radius: 8,
+                    fillColor: "#ff7800",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                  });
+                }
+              }).addTo(window.api.map);
+
+              // console.log(data)
+
+              // adds data into dataset
+              // context.data.mergeFeatures(geojson.features, 'map');
+            }
+        });
+      }
     });
     
 };
