@@ -1,6 +1,7 @@
 var geojsonRandom = require('geojson-random'),
     geojsonExtent = require('geojson-extent'),
     http = require('http'),
+    merge = require('turf-merge'),
     intersect = require('turf-intersect');
 // var $ = require('jquery'),
 //     XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
@@ -54,6 +55,10 @@ request(url, function (error, response, body) {
 })
 }
 module.exports.isochrones = function(context) {
+  var response = prompt('Commute time in minutes (default: 30)');
+  if (response === null) return;
+  var seconds = parseInt(response, 10) * 60;
+  if (isNaN(seconds)) seconds = 30 * 60;
 	console.log(context.data.get('map'));
   var map = context.data.get('map')
   // var features = map.features;
@@ -61,36 +66,48 @@ module.exports.isochrones = function(context) {
   var geojson;
   var features = [];
   var geoLayer;
-	var options = {
-	  host: 'opentrip.atlantaregion.com',
-	  // port: 80,
-	  path: '/otp-rest-servlet/ws/plan?&fromPlace=33.87725673930016%2C-84.46014404296875&toPlace=33.74946419232578%2C-84.38873291015625&time=1%3A13pm&date=03-21-2014&mode=TRANSIT%2CWALK&maxWalkDistance=750&arriveBy=false&showIntermediateStops=false&itinIndex=0&callback=?',
-	  // headers: {'dataType': 'jsonp'}
-	};
+
   console.log(context)
-  var unioned;
+  var merged;
+  var blank = { "type": "FeatureCollection",
+    "features": []};
+  var done;
+
     $.each(map.features, function(i, feature){
-      if (i !== map.features.length - 1){
-        var url = 'http://opentrip.atlantaregion.com' + '/otp-rest-servlet/ws/isochrone?algorithm%20=accSampling&fromPlace='+ feature.geometry.coordinates[1] + ',' + feature.geometry.coordinates[0]+'&date=2014/06/16&time=12:00:00&maxWalkDistance=1000&mode=WALK,TRANSIT&cutoffSec=1800&cutoffSec=900';
+      
+        var url = 'http://192.168.1.66' + '/otp-rest-servlet/ws/isochrone?algorithm%20=accSampling&fromPlace='+ feature.geometry.coordinates[1] + ',' + feature.geometry.coordinates[0]+'&date=2014/10/07&time=8:30:00&maxWalkDistance=1000&mode=WALK,TRANSIT&cutoffSec='+seconds;
         $.ajax({
             url: url,
             type: "GET",
             dataType: "jsonp", 
             success: function( data ) {
-              if (i !== 0){
-                // unioned = intersect(geojson, data);
-                // console.log(unioned)
+              if (i !== map.features.length - 1){
+                console.log(data)
+                // merged = merge(data);
+                $.each(data.features, function(i, feat){
+                  blank.features.push(feat);
+                })
+                // blank.features.push(merged)
+                // done = merge(blank);
+                geojson = data;
+                console.log(blank)
+                // console.log(done)
+                features.push(geojson.features);
               }
-              geojson = data;
-
-              features.push(geojson.features);
+              else{
+                console.log(i)
+                // console.log(blank)
+                // var done = merge(blank);
+                // console.log(done)
+              }
               geoLayer = L.geoJson(geojson, {
 
                 style: function (feature) {
                   switch (feature.properties.Time) {
-                          case 900: return {fillColor: "#ff0000", fillOpacity: 0.05, weight: 0};
-                          case 1800: return {fillColor: "#0000ff", fillOpacity: 0.05, weight: 0};
-                          // case 900: return {fillColor: "#ff0000", fillOpacity: 0.05, weight: 0};
+                          case 900: return {fillColor: "#e31a1c", fillOpacity: 0.05, weight: 0};
+                          case 1800: return {fillColor: "#fd8d3c", fillOpacity: 0.05, weight: 0};
+                          case 2700: return {fillColor: "#fecc5c", fillOpacity: 0.05, weight: 0};
+                          case 3600: return {fillColor: "#ffffb2", fillOpacity: 0.05, weight: 0};
                       }
                 },
 
@@ -114,7 +131,9 @@ module.exports.isochrones = function(context) {
               // context.data.mergeFeatures(geojson.features, 'map');
             }
         });
-      }
+      
+      
     });
+    
     
 };
