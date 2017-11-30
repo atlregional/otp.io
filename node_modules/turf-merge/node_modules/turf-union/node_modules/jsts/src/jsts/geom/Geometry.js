@@ -600,10 +600,10 @@ jsts.geom.Geometry.prototype.intersects = function(g) {
 
   // optimization for rectangle arguments
   if (this.isRectangle()) {
-    return RectangleIntersects.intersects(this, g);
+    return jsts.operation.predicate.RectangleIntersects.intersects(this, g);
   }
   if (g.isRectangle()) {
-    return RectangleIntersects.intersects(g, this);
+    return jsts.operation.predicate.RectangleIntersects.intersects(g, this);
   }
   // general case
   return this.relate(g).isIntersects();
@@ -707,7 +707,7 @@ jsts.geom.Geometry.prototype.contains = function(g) {
   }
   // optimization for rectangle arguments
   if (this.isRectangle()) {
-    return RectangleContains.contains(this, g);
+    return jsts.operation.predicate.RectangleContains.contains(this, g);
   }
   // general case
   return this.relate(g).isContains();
